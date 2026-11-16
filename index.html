@@ -75,7 +75,8 @@ body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max
 <b>Groq API key</b>
 <span class="mu">Ye key sirf aapke phone mein save hoti hai. Kisi ko mat dikhana.</span>
 <input id="kin" type="password" placeholder="gsk_...">
-<span class="mu">AIRA ki bolne ki speed (kam = dheere)</span><input id="rt" type="range" min="0.5" max="1.1" step="0.05"><span class="mu">Awaaz chuno</span><select id="vs" style="padding:10px;border:1px solid #DCE6F7;border-radius:10px;font-size:14px;background:#fff;color:#0F1B3D"></select><button class="btn" id="tv" style="margin:0">🔊 Test awaaz</button>
+<span class="mu">AIRA ki bolne ki speed (kam = dheere)</span><input id="rt" type="range" min="0.5" max="1.1" step="0.05"><span class="mu">Awaaz chuno</span><select id="vs" style="padding:10px;border:1px solid #DCE6F7;border-radius:10px;font-size:14px;background:#fff;color:#0F1B3D"></select><label class="mu"><input type="checkbox" id="nat"> Natural ladki ki awaaz (Groq) use karo</label><select id="nv" style="padding:10px;border:1px solid #DCE6F7;border-radius:10px;font-size:14px;background:#fff;color:#0F1B3D"><option value="hannah">hannah</option><option value="diana">diana</option><option value="autumn">autumn</option></select><span class="mu" id="nm"></span>
+<button class="btn" id="tv" style="margin:0">🔊 Test awaaz</button>
 <button class="go" id="ks" style="text-align:center">Save</button>
 <button class="btn" id="kc">Cancel</button>
 </div></div>
@@ -89,8 +90,41 @@ function prog(){try{const p=JSON.parse(localStorage[PG]||'{}');return p.d===day(
 function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function loadV(){try{voices=speechSynthesis.getVoices()}catch(e){}}
 loadV();try{speechSynthesis.onvoiceschanged=loadV}catch(e){}
-function pick(l){if(l==='en'){const m=voices.find(v=>v.name===localStorage.sm_voice);if(m)return m}const a=voices.filter(v=>v.lang.toLowerCase().startsWith(l));return a.find(v=>/female|zira|samantha|heera|veena|neerja|aria|jenny|google/i.test(v.name))||a[0]}
-function speak(t,l){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t),v=pick(l);if(v)u.voice=v;u.lang=l==='hi'?'hi-IN':'en-IN';u.pitch=1.2;u.rate=+(localStorage.sm_rate||.8);speechSynthesis.speak(u)}catch(e){}}
+function pick(l){
+  if(l==='en'){const m=voices.find(v=>v.name===localStorage.sm_voice);if(m)return m}
+  const a=voices.filter(v=>v.lang.toLowerCase().replace('_','-').startsWith(l));
+  const sc=v=>{const n=v.name.toLowerCase(),g=v.lang.toLowerCase().replace('_','-');let x=0;
+    if(/female|woman|girl/.test(n))x+=5;
+    if(/\bmale\b/.test(n))x-=9;
+    if(/google|neural|natural|wavenet|enhanced|premium/.test(n))x+=3;
+    if(g==='en-in')x+=2;
+    if(/heera|neerja|zira|samantha|aria|jenny|veena|swara|sonia|libby/.test(n))x+=4;
+    if(!v.localService)x+=1;return x};
+  return a.slice().sort((p,q)=>sc(q)-sc(p))[0];
+}
+function speakB(t,l){try{speechSynthesis.cancel();const v=pick(l==='hi'?'hi':'en');(t.match(/[^.!?।]+[.!?।]*/g)||[t]).forEach(x=>{x=x.trim();if(!x)return;const u=new SpeechSynthesisUtterance(x);if(v)u.voice=v;u.lang=l==='hi'?'hi-IN':'en-IN';u.pitch=1.05;u.rate=+(localStorage.sm_rate||.85);speechSynthesis.speak(u)})}catch(e){}}
+let au=null,spk=0;
+function stopA(){spk++;try{au&&au.pause()}catch(e){}au=null}
+async function speakNat(t){
+  stopA();const id=spk;
+  const parts=(t.match(/[^.!?]+[.!?]*/g)||[t]).map(x=>x.trim()).filter(Boolean);
+  const ch=[];let c='';
+  for(const p of parts){if((c+' '+p).length>180&&c){ch.push(c);c=p}else c=c?c+' '+p:p}
+  if(c)ch.push(c);
+  for(const x of ch){
+    const r=await fetch('https://api.groq.com/openai/v1/audio/speech',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+localStorage[K]},body:JSON.stringify({model:'canopylabs/orpheus-v1-english',voice:localStorage.sm_nv||'hannah',input:x.slice(0,195),response_format:'wav'})});
+    if(!r.ok){let m='';try{m=(await r.json()).error.message}catch(e){}throw new Error(r.status+' '+m)}
+    const b=await r.blob();if(id!==spk)return;
+    await new Promise((res,rej)=>{au=new Audio(URL.createObjectURL(b));au.onended=res;au.onerror=rej;au.play().catch(rej)});
+    if(id!==spk)return;
+  }
+}
+function speak(t,l){
+  try{speechSynthesis.cancel()}catch(e){}stopA();
+  if(l==='en'&&localStorage.sm_nat==='1'&&localStorage[K]){
+    speakNat(t).then(()=>{$('#nm').textContent=''}).catch(e=>{$('#nm').textContent='Natural awaaz nahi chali ('+e.message+'). Phone ki awaaz use ho rahi hai.';speakB(t,l)});
+  }else speakB(t,l);
+}
 function home(){
   $('#home').hidden=false;$('#chat').hidden=true;
   let m=null;try{m=JSON.parse(localStorage[MS]||'null')}catch(e){}
@@ -157,14 +191,14 @@ $('#mic').onclick=()=>{
 };
 $('#send').onclick=()=>send($('#t').value);
 $('#t').onkeydown=e=>{if(e.key==='Enter')send($('#t').value)};
-$('#back').onclick=()=>{try{speechSynthesis.cancel()}catch(e){}home()};
+$('#back').onclick=()=>{try{speechSynthesis.cancel()}catch(e){}stopA();home()};
 document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>go(b.dataset.m));
 $('#soon').onclick=()=>alert('Pronunciation Help जल्दी आ रहा है!');
-function fillSet(){$('#kin').value='';$('#rt').value=localStorage.sm_rate||.8;const s=$('#vs');s.innerHTML='<option value="">Auto (female)</option>'+voices.filter(v=>v.lang.toLowerCase().startsWith('en')).map(v=>'<option value="'+esc(v.name)+'">'+esc(v.name)+'</option>').join('');s.value=localStorage.sm_voice||''}
+function fillSet(){$('#nat').checked=localStorage.sm_nat==='1';$('#nv').value=localStorage.sm_nv||'hannah';$('#nm').textContent='';$('#kin').value='';$('#rt').value=localStorage.sm_rate||.8;const s=$('#vs');s.innerHTML='<option value="">Auto (female)</option>'+voices.filter(v=>v.lang.toLowerCase().startsWith('en')).map(v=>'<option value="'+esc(v.name)+'">'+esc(v.name)+'</option>').join('');s.value=localStorage.sm_voice||''}
 $('#gear').onclick=()=>{fillSet();$('#set').hidden=false};
-$('#tv').onclick=()=>{localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;speak('Hello! I am AIRA. Let us speak English together.','en')};
+$('#tv').onclick=()=>{localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;localStorage.sm_nat=$('#nat').checked?'1':'0';localStorage.sm_nv=$('#nv').value;speak('Hello! I am AIRA. Let us speak English together.','en')};
 $('#kc').onclick=()=>{$('#set').hidden=true};
-$('#ks').onclick=()=>{const v=$('#kin').value.trim();if(v){localStorage[K]=v}localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;$('#set').hidden=true};
+$('#ks').onclick=()=>{const v=$('#kin').value.trim();if(v){localStorage[K]=v}localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;localStorage.sm_nat=$('#nat').checked?'1':'0';localStorage.sm_nv=$('#nv').value;$('#set').hidden=true};
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 home();
 </script>

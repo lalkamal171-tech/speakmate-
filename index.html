@@ -14,7 +14,7 @@ body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max
 .scr{padding:14px;display:flex;flex-direction:column;gap:12px;min-height:100vh}
 [hidden]{display:none!important}
 .row{display:flex;align-items:center;gap:10px}
-.logo{width:36px;height:36px;border-radius:10px;background:#1E6BFF;color:#fff;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center}
+.logo{width:36px;height:36px;border-radius:10px;object-fit:cover;background:#1E6BFF;color:#fff;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center}
 .mu{color:#5B6785;font-size:12px}
 .hero{background:#E6F0FF;border-radius:14px;padding:12px}
 .bot{width:56px;height:56px;border-radius:50%;background:#1E6BFF;color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;flex:none}
@@ -49,10 +49,10 @@ body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max
 
 <div class="scr" id="home">
 <div class="row" style="justify-content:space-between">
-<div class="row"><div class="logo">S</div><div><b>SpeakMate <span style="color:#1E6BFF">AI</span></b><div class="mu">Speak · Learn · Grow</div></div></div>
+<div class="row"><img class="logo" src="icon-192.png" alt=""><div><b>SpeakMate <span style="color:#1E6BFF">AI</span></b><div class="mu">Speak · Learn · Grow</div></div></div>
 <button class="x" id="gear" aria-label="Settings">⚙</button>
 </div>
-<div class="hero row"><div class="bot">🤖</div><div class="say"><b>Hello!</b><br>मैं हूँ आपकी English Teacher, मीरा। चलो, आज से अंग्रेज़ी बोलना सीखते हैं!</div></div>
+<img src="hero.jpg" alt="Meera, your English teacher" style="width:100%;border-radius:14px;display:block">
 <button class="go" data-m="speak">▶ Start Practice<small>अभी से अंग्रेज़ी बोलने का अभ्यास शुरू करें</small></button>
 <div class="g">
 <button class="t" data-m="speak" style="background:#EEEAFE">🎤 Speaking Practice<small>बोलकर सीखें</small></button>
@@ -65,7 +65,7 @@ body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max
 </div>
 
 <div class="scr" id="chat" hidden>
-<div class="top"><button class="x" id="back" aria-label="Back">←</button><div class="logo">S</div><div><b>Meera</b><div class="mu" id="md"></div></div></div>
+<div class="top"><button class="x" id="back" aria-label="Back">←</button><img class="logo" src="icon-192.png" alt=""><div><b>Meera</b><div class="mu" id="md"></div></div></div>
 <div id="log"></div>
 <div id="st"></div>
 <div id="in"><button class="rb" id="mic" aria-label="Bolo">🎤</button><input id="t" placeholder="Ya yahan English likho…"><button class="rb" id="send" aria-label="Bhejo">➤</button></div>
@@ -75,6 +75,7 @@ body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max
 <b>Groq API key</b>
 <span class="mu">Ye key sirf aapke phone mein save hoti hai. Kisi ko mat dikhana.</span>
 <input id="kin" type="password" placeholder="gsk_...">
+<span class="mu">Meera ki bolne ki speed (kam = dheere)</span><input id="rt" type="range" min="0.5" max="1.1" step="0.05"><span class="mu">Awaaz chuno</span><select id="vs" style="padding:10px;border:1px solid #DCE6F7;border-radius:10px;font-size:14px;background:#fff;color:#0F1B3D"></select><button class="btn" id="tv" style="margin:0">🔊 Test awaaz</button>
 <button class="go" id="ks" style="text-align:center">Save</button>
 <button class="btn" id="kc">Cancel</button>
 </div></div>
@@ -88,8 +89,8 @@ function prog(){try{const p=JSON.parse(localStorage[PG]||'{}');return p.d===day(
 function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
 function loadV(){try{voices=speechSynthesis.getVoices()}catch(e){}}
 loadV();try{speechSynthesis.onvoiceschanged=loadV}catch(e){}
-function pick(l){const a=voices.filter(v=>v.lang.toLowerCase().startsWith(l));return a.find(v=>/female|zira|samantha|heera|veena|neerja|aria|jenny|google/i.test(v.name))||a[0]}
-function speak(t,l){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t),v=pick(l);if(v)u.voice=v;u.lang=l==='hi'?'hi-IN':'en-IN';u.pitch=1.25;u.rate=.92;speechSynthesis.speak(u)}catch(e){}}
+function pick(l){if(l==='en'){const m=voices.find(v=>v.name===localStorage.sm_voice);if(m)return m}const a=voices.filter(v=>v.lang.toLowerCase().startsWith(l));return a.find(v=>/female|zira|samantha|heera|veena|neerja|aria|jenny|google/i.test(v.name))||a[0]}
+function speak(t,l){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t),v=pick(l);if(v)u.voice=v;u.lang=l==='hi'?'hi-IN':'en-IN';u.pitch=1.2;u.rate=+(localStorage.sm_rate||.8);speechSynthesis.speak(u)}catch(e){}}
 function home(){
   $('#home').hidden=false;$('#chat').hidden=true;
   let m=null;try{m=JSON.parse(localStorage[MS]||'null')}catch(e){}
@@ -147,9 +148,11 @@ $('#t').onkeydown=e=>{if(e.key==='Enter')send($('#t').value)};
 $('#back').onclick=()=>{try{speechSynthesis.cancel()}catch(e){}home()};
 document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>go(b.dataset.m));
 $('#soon').onclick=()=>alert('Pronunciation Help जल्दी आ रहा है!');
-$('#gear').onclick=()=>{$('#kin').value='';$('#set').hidden=false};
+function fillSet(){$('#kin').value='';$('#rt').value=localStorage.sm_rate||.8;const s=$('#vs');s.innerHTML='<option value="">Auto (female)</option>'+voices.filter(v=>v.lang.toLowerCase().startsWith('en')).map(v=>'<option value="'+esc(v.name)+'">'+esc(v.name)+'</option>').join('');s.value=localStorage.sm_voice||''}
+$('#gear').onclick=()=>{fillSet();$('#set').hidden=false};
+$('#tv').onclick=()=>{localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;speak('Hello! I am Meera. Let us speak English together.','en')};
 $('#kc').onclick=()=>{$('#set').hidden=true};
-$('#ks').onclick=()=>{const v=$('#kin').value.trim();if(v){localStorage[K]=v}$('#set').hidden=true};
+$('#ks').onclick=()=>{const v=$('#kin').value.trim();if(v){localStorage[K]=v}localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;$('#set').hidden=true};
 home();
 </script>
 </body>

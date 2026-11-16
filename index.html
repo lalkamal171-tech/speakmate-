@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1E6BFF">
+<meta name="color-scheme" content="light">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<title>SpeakMate AI</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max-width:480px;margin:0 auto;min-height:100vh}
+.scr{padding:14px;display:flex;flex-direction:column;gap:12px;min-height:100vh}
+[hidden]{display:none!important}
+.row{display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;border-radius:10px;background:#1E6BFF;color:#fff;font-weight:700;font-size:20px;display:flex;align-items:center;justify-content:center}
+.mu{color:#5B6785;font-size:12px}
+.hero{background:#E6F0FF;border-radius:14px;padding:12px}
+.bot{width:56px;height:56px;border-radius:50%;background:#1E6BFF;color:#fff;font-size:30px;display:flex;align-items:center;justify-content:center;flex:none}
+.say{background:#fff;border-radius:12px;padding:8px 10px;font-size:14px}
+.go{background:#1E6BFF;color:#fff;border:0;border-radius:14px;padding:14px;font-size:17px;font-weight:600;text-align:left;width:100%}
+.go small{display:block;font-weight:400;font-size:12px}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.t{border:0;border-radius:12px;padding:12px;text-align:left;font-size:14px;font-weight:600;color:#0F1B3D}
+.t small{display:block;font-weight:400;color:#5B6785;font-size:12px;margin-top:2px}
+.card{background:#F3F7FF;border:.5px solid #DCE6F7;border-radius:12px;padding:12px;font-size:14px}
+.bar{height:8px;background:#D6E4FF;border-radius:4px;margin-top:8px}.bar i{display:block;height:8px;background:#1E6BFF;border-radius:4px}
+.wr{color:#D32F2F}.ok{color:#1B8A4B;font-weight:600}
+.btn{background:#fff;border:1px solid #1E6BFF;color:#1E6BFF;border-radius:8px;padding:8px;font-size:13px;font-weight:600;margin-top:8px}
+.top{display:flex;align-items:center;gap:10px;border-bottom:.5px solid #DCE6F7;padding-bottom:10px}
+.x{background:none;border:0;font-size:22px;color:#1E6BFF}
+#log{flex:1;display:flex;flex-direction:column;gap:10px;overflow-y:auto}
+.b{max-width:90%;padding:10px 12px;border-radius:14px;background:#F3F7FF;border:.5px solid #DCE6F7;font-size:15px;line-height:1.45}
+.u{align-self:flex-end;background:#1E6BFF;color:#fff;border-color:#1E6BFF}
+.fx{margin-top:8px;padding:8px;border-radius:10px;background:#FFF1E0;font-size:14px}
+.gd{margin-top:8px;padding:8px;border-radius:10px;background:#E5F7EC;font-size:14px}
+#in{display:flex;gap:8px;align-items:center;padding-top:8px;border-top:.5px solid #DCE6F7}
+#t{flex:1;min-width:0;padding:12px;border:1px solid #DCE6F7;border-radius:12px;font-size:15px;background:#fff;color:#0F1B3D}
+.rb{width:50px;height:50px;border-radius:50%;border:0;background:#1E6BFF;color:#fff;font-size:22px;flex:none}
+.rb.on{background:#D32F2F}
+#st{font-size:12px;color:#5B6785;min-height:16px}
+#set{position:fixed;inset:0;background:rgba(15,27,61,.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
+#set div{background:#fff;border-radius:14px;padding:16px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px}
+#set input{padding:12px;border:1px solid #DCE6F7;border-radius:10px;font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="scr" id="home">
+<div class="row" style="justify-content:space-between">
+<div class="row"><div class="logo">S</div><div><b>SpeakMate <span style="color:#1E6BFF">AI</span></b><div class="mu">Speak · Learn · Grow</div></div></div>
+<button class="x" id="gear" aria-label="Settings">⚙</button>
+</div>
+<div class="hero row"><div class="bot">🤖</div><div class="say"><b>Hello!</b><br>मैं हूँ आपकी English Teacher, मीरा। चलो, आज से अंग्रेज़ी बोलना सीखते हैं!</div></div>
+<button class="go" data-m="speak">▶ Start Practice<small>अभी से अंग्रेज़ी बोलने का अभ्यास शुरू करें</small></button>
+<div class="g">
+<button class="t" data-m="speak" style="background:#EEEAFE">🎤 Speaking Practice<small>बोलकर सीखें</small></button>
+<button class="t" data-m="talk" style="background:#E5F7EC">💬 AI Conversation<small>AI से बात करें</small></button>
+<button class="t" data-m="grammar" style="background:#FFF1E0">✏️ Grammar Correction<small>गलती सुधारें</small></button>
+<button class="t" id="soon" style="background:#E6F0FF">🔊 Pronunciation Help<small>जल्दी आ रहा है</small></button>
+</div>
+<div class="card" id="mc"></div>
+<div class="card"><div class="row" style="justify-content:space-between"><b>Your Progress</b><span class="mu" id="pt"></span></div><div class="bar"><i id="pb" style="width:0"></i></div></div>
+</div>
+
+<div class="scr" id="chat" hidden>
+<div class="top"><button class="x" id="back" aria-label="Back">←</button><div class="logo">S</div><div><b>Meera</b><div class="mu" id="md"></div></div></div>
+<div id="log"></div>
+<div id="st"></div>
+<div id="in"><button class="rb" id="mic" aria-label="Bolo">🎤</button><input id="t" placeholder="Ya yahan English likho…"><button class="rb" id="send" aria-label="Bhejo">➤</button></div>
+</div>
+
+<div id="set" hidden><div>
+<b>Groq API key</b>
+<span class="mu">Ye key sirf aapke phone mein save hoti hai. Kisi ko mat dikhana.</span>
+<input id="kin" type="password" placeholder="gsk_...">
+<button class="go" id="ks" style="text-align:center">Save</button>
+<button class="btn" id="kc">Cancel</button>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s),K='sm_key',MS='sm_mis',PG='sm_prog';
+let mode='speak',hist=[],busy=false,voices=[],rec=null;
+const MODES={speak:'Speaking Practice',talk:'AI Conversation',grammar:'Grammar Correction'};
+const day=()=>new Date().toDateString();
+function prog(){try{const p=JSON.parse(localStorage[PG]||'{}');return p.d===day()?p:{d:day(),n:0}}catch(e){return{d:day(),n:0}}}
+function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+function loadV(){try{voices=speechSynthesis.getVoices()}catch(e){}}
+loadV();try{speechSynthesis.onvoiceschanged=loadV}catch(e){}
+function pick(l){const a=voices.filter(v=>v.lang.toLowerCase().startsWith(l));return a.find(v=>/female|zira|samantha|heera|veena|neerja|aria|jenny|google/i.test(v.name))||a[0]}
+function speak(t,l){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t),v=pick(l);if(v)u.voice=v;u.lang=l==='hi'?'hi-IN':'en-IN';u.pitch=1.25;u.rate=.92;speechSynthesis.speak(u)}catch(e){}}
+function home(){
+  $('#home').hidden=false;$('#chat').hidden=true;
+  let m=null;try{m=JSON.parse(localStorage[MS]||'null')}catch(e){}
+  $('#mc').innerHTML=m?'<b>पिछली गलती</b><p class="wr" style="margin:8px 0 2px">✗ '+esc(m.wrong)+'</p><p class="ok" style="margin:0">✓ '+esc(m.correct)+'</p><p class="mu" style="margin:6px 0 0">'+esc(m.hindi)+'</p><button class="btn" id="redo">🎤 फिर से बोलकर देखो</button>':'<b>पिछली गलती</b><p class="mu" style="margin:6px 0 0">अभी तक कोई गलती नहीं। बातचीत शुरू करो!</p>';
+  const r=$('#redo');if(r)r.onclick=()=>{go('speak');speak(m.correct,'en');say('Try saying: <b>'+esc(m.correct)+'</b>')};
+  const n=prog().n;$('#pt').textContent='आज के सवाल: '+n+'/10';$('#pb').style.width=Math.min(100,n*10)+'%';
+}
+function bub(cls,h){const d=document.createElement('div');d.className='b '+cls;d.innerHTML=h;$('#log').appendChild(d);d.scrollIntoView({block:'end'});return d}
+function say(h){return bub('',h)}
+function go(m){
+  mode=m;hist=[];$('#log').innerHTML='';$('#home').hidden=true;$('#chat').hidden=false;$('#md').textContent=MODES[m];
+  const hi='Hello! I am Meera. How are you today?';hist.push({role:'assistant',content:hi});
+  say(esc(hi)+'<div class="mu" style="margin-top:6px">मीरा: 🎤 दबाकर English बोलो, या नीचे लिखो।</div>');speak(hi,'en');
+  if(!localStorage[K])$('#set').hidden=false;
+}
+async function ask(){
+  const sys='You are Meera, a sweet, warm, encouraging English speaking tutor for a Hindi-speaking beginner. '+(mode==='grammar'?'Be strict about grammar: check every message carefully. ':'Chat naturally about everyday topics. ')+'Reply in SIMPLE English, 1-3 short sentences, and end with a question. Check the student\'s LAST message for grammar or word mistakes (ignore punctuation and capital letters, since text comes from speech). Reply ONLY with JSON: {"reply":"your English reply","mistake":true or false,"wrong":"the wrong sentence","correct":"the corrected sentence","hindi":"short friendly explanation in Hindi (Devanagari) saying where the mistake was and how to fix it"}. If there is no mistake: mistake=false and the other fields empty.';
+  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+localStorage[K]},body:JSON.stringify({model:'llama-3.3-70b-versatile',temperature:.5,response_format:{type:'json_object'},messages:[{role:'system',content:sys}].concat(hist.slice(-10))})});
+  if(!r.ok)throw new Error(r.status);
+  return JSON.parse((await r.json()).choices[0].message.content);
+}
+async function send(text){
+  text=(text||'').trim();if(!text||busy)return;
+  if(!localStorage[K]){$('#set').hidden=false;return}
+  busy=true;$('#t').value='';bub('u',esc(text));hist.push({role:'user',content:text});$('#st').textContent='मीरा सोच रही है…';
+  try{
+    const j=await ask();hist.push({role:'assistant',content:j.reply});
+    let h=esc(j.reply);
+    if(j.mistake){h+='<div class="fx">❌ '+esc(j.wrong)+'<br>✅ <b>'+esc(j.correct)+'</b><br>'+esc(j.hindi)+'</div>';localStorage[MS]=JSON.stringify({wrong:j.wrong,correct:j.correct,hindi:j.hindi})}
+    else h+='<div class="gd">✅ बिल्कुल सही! शाबाश 👏</div>';
+    const d=say(h);
+    const b1=document.createElement('button');b1.className='btn';b1.textContent='🔊 Meera';b1.onclick=()=>speak(j.reply,'en');d.appendChild(b1);
+    if(j.mistake&&j.hindi){const b2=document.createElement('button');b2.className='btn';b2.style.marginLeft='6px';b2.textContent='🔊 हिंदी में सुनो';b2.onclick=()=>speak(j.hindi,'hi');d.appendChild(b2)}
+    speak(j.reply,'en');
+    const p=prog();p.n++;localStorage[PG]=JSON.stringify(p);
+  }catch(e){
+    say(String(e.message)==='401'?'Key galat lag rahi hai. ⚙ Settings mein dobara dalo.':'Kuch gadbad ho gayi (network ya limit). Thodi der baad try karo. 🙏');
+  }
+  busy=false;$('#st').textContent='';
+}
+$('#mic').onclick=()=>{
+  try{speechSynthesis.cancel()}catch(e){}
+  if(rec){rec.stop();return}
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){$('#st').textContent='Is browser mein mic nahi chalta. Chrome use karo ya likho.';return}
+  rec=new SR();rec.lang='en-IN';rec.interimResults=false;
+  rec.onstart=()=>{$('#mic').classList.add('on');$('#st').textContent='सुन रही हूँ… बोलो 🎧'};
+  rec.onresult=e=>send(e.results[0][0].transcript);
+  rec.onerror=e=>{$('#st').textContent=e.error==='not-allowed'?'Mic ki permission Allow karo.':'Mic nahi chala. Dobara dabao ya likho.'};
+  rec.onend=()=>{rec=null;$('#mic').classList.remove('on')};
+  try{rec.start()}catch(e){rec=null}
+};
+$('#send').onclick=()=>send($('#t').value);
+$('#t').onkeydown=e=>{if(e.key==='Enter')send($('#t').value)};
+$('#back').onclick=()=>{try{speechSynthesis.cancel()}catch(e){}home()};
+document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>go(b.dataset.m));
+$('#soon').onclick=()=>alert('Pronunciation Help जल्दी आ रहा है!');
+$('#gear').onclick=()=>{$('#kin').value='';$('#set').hidden=false};
+$('#kc').onclick=()=>{$('#set').hidden=true};
+$('#ks').onclick=()=>{const v=$('#kin').value.trim();if(v){localStorage[K]=v}$('#set').hidden=true};
+home();
+</script>
+</body>
+</html>

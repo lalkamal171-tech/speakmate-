@@ -108,14 +108,19 @@ function go(m){
 }
 async function ask(){
   const sys='You are AIRA, a sweet, warm, encouraging English speaking tutor for a Hindi-speaking beginner. '+(mode==='grammar'?'Be strict about grammar: check every message carefully. ':'Chat naturally about everyday topics. ')+'Reply in SIMPLE English, 1-3 short sentences, and end with a question. Check the student\'s LAST message for grammar or word mistakes (ignore punctuation and capital letters, since text comes from speech). Reply ONLY with JSON: {"reply":"your English reply","mistake":true or false,"wrong":"the wrong sentence","correct":"the corrected sentence","hindi":"short friendly explanation in Hindi (Devanagari) saying where the mistake was and how to fix it"}. If there is no mistake: mistake=false and the other fields empty.';
-  const models=['llama-3.3-70b-versatile','llama-3.1-8b-instant'];let last='';
+  const models=['openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.3-70b-versatile'];let last='';
   for(const m of models){
-    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+localStorage[K]},body:JSON.stringify({model:m,temperature:.5,response_format:{type:'json_object'},messages:[{role:'system',content:sys}].concat(hist.slice(-10))})});
-    if(r.ok){const c=(await r.json()).choices[0].message.content;try{return JSON.parse(c)}catch(e){return{reply:c,mistake:false}}}
-    let msg='';try{msg=(await r.json()).error.message}catch(e){}
-    last=r.status+' '+msg;
-    if(r.status===401)throw new Error('401');
-    if(![400,404,429,503].includes(r.status))break;
+    for(const jf of [1,0]){
+      const body={model:m,temperature:.5,messages:[{role:'system',content:sys}].concat(hist.slice(-10))};
+      if(m.startsWith('openai/'))body.reasoning_effort='low';
+      if(jf)body.response_format={type:'json_object'};
+      const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+localStorage[K]},body:JSON.stringify(body)});
+      if(r.ok){const c=(await r.json()).choices[0].message.content||'';try{return JSON.parse(c.replace(/```json|```/g,'').trim())}catch(e){return{reply:c,mistake:false}}}
+      let msg='';try{msg=(await r.json()).error.message}catch(e){}
+      last=r.status+' '+m+': '+msg;
+      if(r.status===401)throw new Error('401');
+      if(r.status!==400)break;
+    }
   }
   throw new Error(last);
 }

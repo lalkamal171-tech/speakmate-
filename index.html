@@ -52,7 +52,7 @@ body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max
 <div class="row"><img class="logo" src="icon-192.png" alt=""><div><b>SpeakMate <span style="color:#1E6BFF">AI</span></b><div class="mu">Speak · Learn · Grow</div></div></div>
 <button class="x" id="gear" aria-label="Settings">⚙</button>
 </div>
-<img src="hero.jpg" alt="Meera, your English teacher" style="width:100%;border-radius:14px;display:block">
+<img src="hero.jpg" alt="AIRA, your English teacher" style="width:100%;border-radius:14px;display:block">
 <button class="go" data-m="speak">▶ Start Practice<small>अभी से अंग्रेज़ी बोलने का अभ्यास शुरू करें</small></button>
 <div class="g">
 <button class="t" data-m="speak" style="background:#EEEAFE">🎤 Speaking Practice<small>बोलकर सीखें</small></button>
@@ -65,7 +65,7 @@ body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max
 </div>
 
 <div class="scr" id="chat" hidden>
-<div class="top"><button class="x" id="back" aria-label="Back">←</button><img class="logo" src="icon-192.png" alt=""><div><b>Meera</b><div class="mu" id="md"></div></div></div>
+<div class="top"><button class="x" id="back" aria-label="Back">←</button><img class="logo" src="icon-192.png" alt=""><div><b>AIRA</b><div class="mu" id="md"></div></div></div>
 <div id="log"></div>
 <div id="st"></div>
 <div id="in"><button class="rb" id="mic" aria-label="Bolo">🎤</button><input id="t" placeholder="Ya yahan English likho…"><button class="rb" id="send" aria-label="Bhejo">➤</button></div>
@@ -75,7 +75,7 @@ body{margin:0;background:#fff;color:#0F1B3D;font-family:system-ui,sans-serif;max
 <b>Groq API key</b>
 <span class="mu">Ye key sirf aapke phone mein save hoti hai. Kisi ko mat dikhana.</span>
 <input id="kin" type="password" placeholder="gsk_...">
-<span class="mu">Meera ki bolne ki speed (kam = dheere)</span><input id="rt" type="range" min="0.5" max="1.1" step="0.05"><span class="mu">Awaaz chuno</span><select id="vs" style="padding:10px;border:1px solid #DCE6F7;border-radius:10px;font-size:14px;background:#fff;color:#0F1B3D"></select><button class="btn" id="tv" style="margin:0">🔊 Test awaaz</button>
+<span class="mu">AIRA ki bolne ki speed (kam = dheere)</span><input id="rt" type="range" min="0.5" max="1.1" step="0.05"><span class="mu">Awaaz chuno</span><select id="vs" style="padding:10px;border:1px solid #DCE6F7;border-radius:10px;font-size:14px;background:#fff;color:#0F1B3D"></select><button class="btn" id="tv" style="margin:0">🔊 Test awaaz</button>
 <button class="go" id="ks" style="text-align:center">Save</button>
 <button class="btn" id="kc">Cancel</button>
 </div></div>
@@ -102,32 +102,39 @@ function bub(cls,h){const d=document.createElement('div');d.className='b '+cls;d
 function say(h){return bub('',h)}
 function go(m){
   mode=m;hist=[];$('#log').innerHTML='';$('#home').hidden=true;$('#chat').hidden=false;$('#md').textContent=MODES[m];
-  const hi='Hello! I am Meera. How are you today?';hist.push({role:'assistant',content:hi});
-  say(esc(hi)+'<div class="mu" style="margin-top:6px">मीरा: 🎤 दबाकर English बोलो, या नीचे लिखो।</div>');speak(hi,'en');
+  const hi='Hello! I am AIRA. How are you today?';hist.push({role:'assistant',content:hi});
+  say(esc(hi)+'<div class="mu" style="margin-top:6px">AIRA: 🎤 दबाकर English बोलो, या नीचे लिखो।</div>');speak(hi,'en');
   if(!localStorage[K])$('#set').hidden=false;
 }
 async function ask(){
-  const sys='You are Meera, a sweet, warm, encouraging English speaking tutor for a Hindi-speaking beginner. '+(mode==='grammar'?'Be strict about grammar: check every message carefully. ':'Chat naturally about everyday topics. ')+'Reply in SIMPLE English, 1-3 short sentences, and end with a question. Check the student\'s LAST message for grammar or word mistakes (ignore punctuation and capital letters, since text comes from speech). Reply ONLY with JSON: {"reply":"your English reply","mistake":true or false,"wrong":"the wrong sentence","correct":"the corrected sentence","hindi":"short friendly explanation in Hindi (Devanagari) saying where the mistake was and how to fix it"}. If there is no mistake: mistake=false and the other fields empty.';
-  const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+localStorage[K]},body:JSON.stringify({model:'llama-3.3-70b-versatile',temperature:.5,response_format:{type:'json_object'},messages:[{role:'system',content:sys}].concat(hist.slice(-10))})});
-  if(!r.ok)throw new Error(r.status);
-  return JSON.parse((await r.json()).choices[0].message.content);
+  const sys='You are AIRA, a sweet, warm, encouraging English speaking tutor for a Hindi-speaking beginner. '+(mode==='grammar'?'Be strict about grammar: check every message carefully. ':'Chat naturally about everyday topics. ')+'Reply in SIMPLE English, 1-3 short sentences, and end with a question. Check the student\'s LAST message for grammar or word mistakes (ignore punctuation and capital letters, since text comes from speech). Reply ONLY with JSON: {"reply":"your English reply","mistake":true or false,"wrong":"the wrong sentence","correct":"the corrected sentence","hindi":"short friendly explanation in Hindi (Devanagari) saying where the mistake was and how to fix it"}. If there is no mistake: mistake=false and the other fields empty.';
+  const models=['llama-3.3-70b-versatile','llama-3.1-8b-instant'];let last='';
+  for(const m of models){
+    const r=await fetch('https://api.groq.com/openai/v1/chat/completions',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+localStorage[K]},body:JSON.stringify({model:m,temperature:.5,response_format:{type:'json_object'},messages:[{role:'system',content:sys}].concat(hist.slice(-10))})});
+    if(r.ok){const c=(await r.json()).choices[0].message.content;try{return JSON.parse(c)}catch(e){return{reply:c,mistake:false}}}
+    let msg='';try{msg=(await r.json()).error.message}catch(e){}
+    last=r.status+' '+msg;
+    if(r.status===401)throw new Error('401');
+    if(![400,404,429,503].includes(r.status))break;
+  }
+  throw new Error(last);
 }
 async function send(text){
   text=(text||'').trim();if(!text||busy)return;
   if(!localStorage[K]){$('#set').hidden=false;return}
-  busy=true;$('#t').value='';bub('u',esc(text));hist.push({role:'user',content:text});$('#st').textContent='मीरा सोच रही है…';
+  busy=true;$('#t').value='';bub('u',esc(text));hist.push({role:'user',content:text});$('#st').textContent='AIRA सोच रही है…';
   try{
     const j=await ask();hist.push({role:'assistant',content:j.reply});
     let h=esc(j.reply);
     if(j.mistake){h+='<div class="fx">❌ '+esc(j.wrong)+'<br>✅ <b>'+esc(j.correct)+'</b><br>'+esc(j.hindi)+'</div>';localStorage[MS]=JSON.stringify({wrong:j.wrong,correct:j.correct,hindi:j.hindi})}
     else h+='<div class="gd">✅ बिल्कुल सही! शाबाश 👏</div>';
     const d=say(h);
-    const b1=document.createElement('button');b1.className='btn';b1.textContent='🔊 Meera';b1.onclick=()=>speak(j.reply,'en');d.appendChild(b1);
+    const b1=document.createElement('button');b1.className='btn';b1.textContent='🔊 AIRA';b1.onclick=()=>speak(j.reply,'en');d.appendChild(b1);
     if(j.mistake&&j.hindi){const b2=document.createElement('button');b2.className='btn';b2.style.marginLeft='6px';b2.textContent='🔊 हिंदी में सुनो';b2.onclick=()=>speak(j.hindi,'hi');d.appendChild(b2)}
     speak(j.reply,'en');
     const p=prog();p.n++;localStorage[PG]=JSON.stringify(p);
   }catch(e){
-    say(String(e.message)==='401'?'Key galat lag rahi hai. ⚙ Settings mein dobara dalo.':'Kuch gadbad ho gayi (network ya limit). Thodi der baad try karo. 🙏');
+    say(String(e.message)==='401'?'Key galat lag rahi hai. ⚙ Settings mein dobara dalo.':'Kuch gadbad ho gayi. 🙏<div class="mu" style="margin-top:6px">'+esc(e.message)+'</div>');
   }
   busy=false;$('#st').textContent='';
 }
@@ -150,9 +157,10 @@ document.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>go(b.dataset.m));
 $('#soon').onclick=()=>alert('Pronunciation Help जल्दी आ रहा है!');
 function fillSet(){$('#kin').value='';$('#rt').value=localStorage.sm_rate||.8;const s=$('#vs');s.innerHTML='<option value="">Auto (female)</option>'+voices.filter(v=>v.lang.toLowerCase().startsWith('en')).map(v=>'<option value="'+esc(v.name)+'">'+esc(v.name)+'</option>').join('');s.value=localStorage.sm_voice||''}
 $('#gear').onclick=()=>{fillSet();$('#set').hidden=false};
-$('#tv').onclick=()=>{localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;speak('Hello! I am Meera. Let us speak English together.','en')};
+$('#tv').onclick=()=>{localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;speak('Hello! I am AIRA. Let us speak English together.','en')};
 $('#kc').onclick=()=>{$('#set').hidden=true};
 $('#ks').onclick=()=>{const v=$('#kin').value.trim();if(v){localStorage[K]=v}localStorage.sm_rate=$('#rt').value;localStorage.sm_voice=$('#vs').value;$('#set').hidden=true};
+if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
 home();
 </script>
 </body>

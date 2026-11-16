@@ -137,11 +137,11 @@ function say(h){return bub('',h)}
 function go(m){
   mode=m;hist=[];$('#log').innerHTML='';$('#home').hidden=true;$('#chat').hidden=false;$('#md').textContent=MODES[m];
   const hi='Hello! I am AIRA. How are you today?';hist.push({role:'assistant',content:hi});
-  say(esc(hi)+'<div class="mu" style="margin-top:6px">AIRA: 🎤 दबाकर English बोलो, या नीचे लिखो।</div>');speak(hi,'en');
+  say(esc(hi)+'<div class="mu" style="margin-top:4px;font-size:13px">हेलो! मैं AIRA हूँ। आज आप कैसे हैं?</div><div class="mu" style="margin-top:6px">AIRA: 🎤 दबाकर English बोलो, या नीचे लिखो।</div>');speak(hi,'en');
   if(!localStorage[K])$('#set').hidden=false;
 }
 async function ask(){
-  const sys='You are AIRA, a sweet, warm, encouraging English speaking tutor for a Hindi-speaking beginner. '+(mode==='grammar'?'Be strict about grammar: check every message carefully. ':'Chat naturally about everyday topics. ')+'Reply in SIMPLE English, 1-3 short sentences, and end with a question. Check the student\'s LAST message for grammar or word mistakes (ignore punctuation and capital letters, since text comes from speech). Reply ONLY with JSON: {"reply":"your English reply","mistake":true or false,"wrong":"the wrong sentence","correct":"the corrected sentence","hindi":"short friendly explanation in Hindi (Devanagari) saying where the mistake was and how to fix it"}. If there is no mistake: mistake=false and the other fields empty.';
+  const sys='You are AIRA, a sweet, warm, encouraging English speaking tutor for a Hindi-speaking beginner. '+(mode==='grammar'?'Be strict about grammar: check every message carefully. ':'Chat naturally about everyday topics. ')+'Reply in SIMPLE English, 1-3 short sentences, and end with a question. Check the student\'s LAST message for grammar or word mistakes (ignore punctuation and capital letters, since text comes from speech). Reply ONLY with JSON: {"reply":"your English reply","reply_hi":"Hindi (Devanagari) translation of your English reply","mistake":true or false,"wrong":"the wrong sentence","correct":"the corrected sentence","hindi":"short friendly explanation in Hindi (Devanagari) saying where the mistake was and how to fix it"}. If there is no mistake: mistake=false and the other fields empty.';
   const models=['openai/gpt-oss-120b','openai/gpt-oss-20b','llama-3.3-70b-versatile'];let last='';
   for(const m of models){
     for(const jf of [1,0]){
@@ -164,7 +164,7 @@ async function send(text){
   busy=true;$('#t').value='';bub('u',esc(text));hist.push({role:'user',content:text});$('#st').textContent='AIRA सोच रही है…';
   try{
     const j=await ask();hist.push({role:'assistant',content:j.reply});
-    let h=esc(j.reply);
+    let h=esc(j.reply);if(j.reply_hi)h+='<div class="mu" style="margin-top:4px;font-size:13px">'+esc(j.reply_hi)+'</div>';
     if(j.mistake){h+='<div class="fx">❌ '+esc(j.wrong)+'<br>✅ <b>'+esc(j.correct)+'</b><br>'+esc(j.hindi)+'</div>';localStorage[MS]=JSON.stringify({wrong:j.wrong,correct:j.correct,hindi:j.hindi})}
     else h+='<div class="gd">✅ बिल्कुल सही! शाबाश 👏</div>';
     const d=say(h);
